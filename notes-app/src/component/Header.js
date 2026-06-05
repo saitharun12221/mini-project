@@ -1,13 +1,11 @@
 // Header.jsx
 import React, { useState } from 'react';
+import { Navbar, Container, Form, InputGroup, Button } from 'react-bootstrap';
 import noteService from './noteService';
-// import './Header.css'; // We'll create this
 
-const Header = ({ onSearchResults, onClearSearch }) => {
+const Header = ({ onSearchResults, onClearSearch, onAdd }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
 
   // Handle search by title containing keyword
   const handleSearch = async () => {
@@ -19,15 +17,11 @@ const Header = ({ onSearchResults, onClearSearch }) => {
     setIsSearching(true);
     
     try {
-      // Search notes by title containing the keyword
       const results = await noteService.getNotesByTitleContaining(searchTerm);
       
-      // Pass results to parent component
       if (onSearchResults) {
         onSearchResults(results, searchTerm);
       }
-      
-      setShowSearchDropdown(false);
     } catch (error) {
       console.error('Search error:', error);
       alert('Error searching notes');
@@ -36,39 +30,19 @@ const Header = ({ onSearchResults, onClearSearch }) => {
     }
   };
 
-  // Handle real-time suggestions as user types
-  const handleSearchInputChange = async (e) => {
+  // Handle input change
+  const handleSearchInputChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
     
-    if (value.trim().length > 0) {
-      try {
-        // Get suggestions for auto-complete
-        const suggestions = await noteService.getNotesByTitleStartingWith(value);
-        setSuggestions(suggestions.slice(0, 5)); // Show top 5 suggestions
-        setShowSearchDropdown(true);
-      } catch (error) {
-        console.error('Error getting suggestions:', error);
-      }
-    } else {
-      setSuggestions([]);
-      setShowSearchDropdown(false);
+    if (value.trim().length === 0 && onClearSearch) {
+      onClearSearch();
     }
-  };
-
-  // Handle suggestion click
-  const handleSuggestionClick = (suggestion) => {
-    setSearchTerm(suggestion.title);
-    setShowSearchDropdown(false);
-    // Auto search when suggestion is clicked
-    setTimeout(() => handleSearch(), 100);
   };
 
   // Clear search and show all notes
   const handleClearSearch = () => {
     setSearchTerm('');
-    setSuggestions([]);
-    setShowSearchDropdown(false);
     if (onClearSearch) {
       onClearSearch();
     }
@@ -82,75 +56,42 @@ const Header = ({ onSearchResults, onClearSearch }) => {
   };
 
   return (
-    <header className="header">
-      <div className="header-container">
-        {/* Logo / Brand */}
-        <div className="logo">
-          <h1>📝 MyNotes</h1>
-        </div>
-
-        {/* Search Bar */}
-        <div className="search-container">
-          <div className="search-input-wrapper">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="Search notes by title..."
-              value={searchTerm}
-              onChange={handleSearchInputChange}
-              onKeyPress={handleKeyPress}
-              onFocus={() => searchTerm && setShowSearchDropdown(true)}
-              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-            />
-            
-            {/* Search Button */}
-            <button 
-              className="search-button"
-              onClick={handleSearch}
-              disabled={isSearching}
-            >
-              {isSearching ? '🔍 Searching...' : '🔍 Search'}
-            </button>
-            
-            {/* Clear Button */}
-            {searchTerm && (
-              <button 
-                className="clear-button"
-                onClick={handleClearSearch}
-                title="Clear search"
-              >
-                ✕
-              </button>
-            )}
+    <Navbar bg="primary" variant="dark" expand="lg" sticky="top" className="shadow">
+      <Container fluid>
+        <Navbar.Brand href="#" className="d-flex align-items-center" onClick={handleClearSearch}>
+          <span style={{ fontSize: '1.5rem', marginRight: '0.5rem' }}>📝</span>
+          <strong>MyNotes</strong>
+        </Navbar.Brand>
+        
+        <Navbar.Toggle aria-controls="navbar-nav" />
+        
+        <Navbar.Collapse id="navbar-nav">
+          <div className="mx-auto" style={{ flex: 1, maxWidth: '500px' }}>
+            <InputGroup>
+              <Form.Control
+                type="text"
+                placeholder="Search notes by title..."
+                value={searchTerm}
+                onChange={handleSearchInputChange}
+                onKeyPress={handleKeyPress}
+              />
+              {searchTerm && (
+                <Button variant="outline-secondary" onClick={handleClearSearch}>
+                  Clear
+                </Button>
+              )}
+              <Button variant="light" onClick={handleSearch} disabled={isSearching}>
+                {isSearching ? 'Searching...' : 'Search'}
+              </Button>
+            </InputGroup>
           </div>
-
-          {/* Search Suggestions Dropdown */}
-          {showSearchDropdown && suggestions.length > 0 && (
-            <div className="search-dropdown">
-              {suggestions.map((note) => (
-                <div 
-                  key={note.id}
-                  className="suggestion-item"
-                  onClick={() => handleSuggestionClick(note)}
-                >
-                  <span className="suggestion-title">📄 {note.title}</span>
-                  <span className="suggestion-preview">
-                    {note.content?.substring(0, 50)}...
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation / User Info */}
-        <div className="nav-links">
-          <button className="nav-button" onClick={onClearSearch}>
-            All Notes
-          </button>
-        </div>
-      </div>
-    </header>
+          
+          <Button variant="success" onClick={onAdd} className="ms-lg-2 mt-2 mt-lg-0">
+            + Create Note
+          </Button>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 };
 

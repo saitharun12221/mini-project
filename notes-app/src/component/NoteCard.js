@@ -1,25 +1,49 @@
 import React from "react";
-function NoteCard({key,title,content,onEdit,onDelete}){
-    const getPreview = (content)=>{
-        if (!content){
-            return "NoContent";
-        }
-        if (content.length<=50){
-            return content;
-        }
-        return content.subString(0,50)+"...";
+import { Card, Button } from "react-bootstrap";
+
+function NoteCard({ key,title,content, onEdit, onDelete }) {
+  const getPreview = (content) => {
+    if (!content) {
+      return "No Content";
     }
-    return(
-        <div>
-            <div className="card">
-                <div className="title">{title || "Untitled Note"}</div>
-                <div className="preview">{getPreview(content)}</div>
-                <div className="actions">
-                    <button className="edit" onClick={onEdit}>Edit</button>
-                    <button className="delete" onClick={onDelete}>Delete</button>
-                </div>
-            </div>
+    if (content.length <= 50) {
+      return content;
+    }
+    return content.substring(0, 50) + "...";
+  };
+
+  return (
+    <Card className="h-100 shadow-sm" style={{ transition: "transform 0.2s" }}>
+      <Card.Body>
+        <div className="d-flex justify-content-between align-items-start mb-2">
+          <Card.Title className="mb-0">
+            {title}
+          </Card.Title>
+          <div>
+            <Button
+              variant="outline-primary"
+              size="sm"
+              className="me-1"
+              onClick={onEdit}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outline-danger"
+              size="sm"
+              onClick={onDelete}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
-    )
+
+        <Card.Text style={{ color: "#666", lineHeight: "1.5" }}>
+          {getPreview(content)}
+        </Card.Text>
+      </Card.Body>
+    </Card>
+  );
 }
+
 export default NoteCard;
