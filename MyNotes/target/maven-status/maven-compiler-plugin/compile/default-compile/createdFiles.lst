@@ -1,0 +1,5 @@
+com\NUKG\Project\MyNotes\MyNotesApplication.class
+com\NUKG\Project\MyNotes\Controller\Api_controller.class
+com\NUKG\Project\MyNotes\Entity\Note.class
+com\NUKG\Project\MyNotes\Entity\NoteDTO.class
+com\NUKG\Project\MyNotes\Service\Api_Service.class
